@@ -5,7 +5,7 @@ stages:
     - test
 
 build_latest:
-    stage: build_latest
+    stage: build
     image: rust_latest
     script:
         - rustc --version
@@ -13,14 +13,14 @@ build_latest:
         - cargo build --verbose
 
 test_latest:
-    stage: test:latest
+    stage: test
     image: rust:latest
     needs: ["build_latest"]
     script:
         - cargo test --verbose
 
 build_nightly:
-    stage: build:nightly
+    stage: build
     image: rustlang/rust:nightly
     script:
         - rustc --version
@@ -29,7 +29,7 @@ build_nightly:
     allow_failure: true
 
 test_nightly:
-    stage: test:nightly
+    stage: test
     image: rustlang/rust:nightly
     needs: ["build_nightly"]
     script:
