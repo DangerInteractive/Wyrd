@@ -50,3 +50,24 @@ impl<T> Default for VecParkingLot<T> {
         }
     }
 }
+
+#[test]
+fn vec_parking_lot_can_fit_lots_of_elements() {
+    let mut parking_lot: VecParkingLot<usize> = Default::default();
+    for i in 0..1000000 {
+        assert!(matches!(parking_lot.put(i), Ok(_)));
+    }
+}
+
+#[test]
+fn vec_parking_lot_can_delete_elements() {
+    let mut parking_lot: VecParkingLot<usize> = Default::default();
+    let index = parking_lot.put(0);
+    match index {
+        Ok(index) => {
+            assert!(matches!(parking_lot.delete(index), Ok(_)));
+            assert!(parking_lot.get(index).is_none());
+        }
+        Err(_) => panic!("cannot test deletion because insertion failed"),
+    }
+}
