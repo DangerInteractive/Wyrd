@@ -2,7 +2,7 @@
 name = "wyrd"
 version = "0.1.0"
 authors = ["Alexander Barber <alex@dangerzonegames.com>"]
-edition = "2018"
+edition = "2021"
 description = "an entity component system created for TimberWolf"
 license = "MIT"
 repository = "https://github.com/DangerInteractive/TimberWolf"
