@@ -75,6 +75,18 @@ impl EntityStorage {
             None => None,
         }
     }
+
+    pub fn get_component_storage_ref<T: 'static + Component>(
+        &self,
+    ) -> Option<&dyn ComponentStorage<T>> {
+        let type_id = TypeId::of::<T>();
+        if let Some(storage) = self.component_storages.get(&type_id) {
+            if let Some(s) = storage.downcast_ref::<Box<dyn ComponentStorage<T>>>() {
+                return Some(s.as_ref());
+            }
+        }
+        None
+    }
 }
 
 pub trait ComponentStorage<T: Component> {
