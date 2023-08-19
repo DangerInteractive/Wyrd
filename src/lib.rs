@@ -9,24 +9,41 @@ pub trait Component: Sized + Debug {}
 pub struct ComponentWriteError {
     component_type: &'static str,
     entity_id: usize,
+    detail: Option<&'static str>,
 }
 
 impl ComponentWriteError {
     pub fn new<T>(entity_id: usize) -> Self {
         Self {
-            component_type: std::any::type_name::<T>(),
+            component_type: type_name::<T>(),
             entity_id,
+            detail: None,
+        }
+    }
+
+    pub fn new_with_detail<T>(entity_id: usize, detail: &'static str) -> Self {
+        Self {
+            component_type: type_name::<T>(),
+            entity_id,
+            detail: Some(detail),
         }
     }
 }
 
 impl Display for ComponentWriteError {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(
-            f,
-            "Failed to write {} component for entity {}.",
-            self.component_type, self.entity_id
-        )
+        match self.detail {
+            Some(detail) => write!(
+                f,
+                "Failed to write `{}` component for entity {}: {}",
+                self.component_type, self.entity_id, detail
+            ),
+            None => write!(
+                f,
+                "Failed to write `{}` component for entity {}.",
+                self.component_type, self.entity_id
+            ),
+        }
     }
 }
 
