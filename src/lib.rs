@@ -94,10 +94,10 @@ where
     T: Component,
 {
     fn get_component(&self, index: usize) -> Option<&'_ T> {
-        match self.components.get(index) {
-            Some(Some(component)) => Some(component),
-            _ => None,
+        if let Some(Some(component)) = self.components.get(index) {
+            return Some(component);
         }
+        None
     }
 
     fn set_component(&mut self, index: usize, component: T) -> Result<(), ()> {
