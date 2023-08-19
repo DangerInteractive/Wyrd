@@ -1,6 +1,7 @@
 image: "rust:latest"
 
 stages:
+    - lint
     - build
     - test
 
@@ -18,6 +19,20 @@ test_latest:
     needs: ["build_latest"]
     script:
         - cargo test --verbose
+
+clippy:
+    stage: lint
+    image: rust:latest
+    script:
+        - rustup component add clippy
+        - cargo clippy -- -D warnings
+
+rustfmt:
+    stage: lint
+    image: rust:latest
+    script:
+        - rustup component add rustfmt
+        - cargo fmt -- --check
 
 build_nightly:
     stage: build
