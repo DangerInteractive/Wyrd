@@ -6,7 +6,7 @@ stages:
 
 build_latest:
     stage: build
-    image: rust_latest
+    image: rust:latest
     script:
         - rustc --version
         - cargo --version  # Print version info for debugging
