@@ -1,5 +1,7 @@
 //! An Entity Component System Library
+use std::any::{type_name, Any, TypeId};
 use std::array::from_fn;
+use std::collections::HashMap;
 use std::error::Error;
 use std::fmt::{Debug, Display, Formatter};
 
@@ -48,6 +50,32 @@ impl Display for ComponentWriteError {
 }
 
 impl Error for ComponentWriteError {}
+
+#[derive(Debug, Default)]
+struct EntityStorage {
+    component_storages: HashMap<TypeId, Box<dyn Any>>,
+}
+
+impl EntityStorage {
+    pub fn insert_component_storage<T: 'static + Component, S: 'static + ComponentStorage<T>>(
+        &mut self,
+        storage: S,
+    ) -> Option<Box<dyn ComponentStorage<T>>> {
+        let boxed_trait: Box<dyn ComponentStorage<T>> = Box::new(storage);
+        let boxed_any: Box<dyn Any> = Box::new(boxed_trait);
+
+        let prev = self.component_storages.insert(TypeId::of::<T>(), boxed_any);
+        match prev {
+            Some(prev_storage) => {
+                if let Ok(s) = prev_storage.downcast::<Box<dyn ComponentStorage<T>>>() {
+                    return Some(*s);
+                }
+                None
+            }
+            None => None,
+        }
+    }
+}
 
 pub trait ComponentStorage<T: Component> {
     fn get_component(&self, index: usize) -> Option<&'_ T>;
