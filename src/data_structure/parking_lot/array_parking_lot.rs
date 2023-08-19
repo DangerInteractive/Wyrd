@@ -51,3 +51,25 @@ impl<T, const SIZE: usize> ParkingLot<T> for ArrayParkingLot<T, SIZE> {
         }
     }
 }
+
+#[test]
+fn array_parking_lot_can_fit_exactly_n_elements() {
+    let mut parking_lot: ArrayParkingLot<usize, 20> = Default::default();
+    for i in 0..20 {
+        assert!(matches!(parking_lot.put(i), Ok(_)));
+    }
+    assert!(matches!(parking_lot.put(21), Err(_)));
+}
+
+#[test]
+fn array_parking_lot_can_delete_elements() {
+    let mut parking_lot: ArrayParkingLot<usize, 1> = Default::default();
+    let index = parking_lot.put(0);
+    match index {
+        Ok(index) => {
+            assert!(matches!(parking_lot.delete(index), Ok(_)));
+            assert!(parking_lot.get(index).is_none());
+        }
+        Err(_) => panic!("cannot test deletion because insertion failed"),
+    }
+}
