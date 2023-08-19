@@ -52,7 +52,7 @@ impl Display for ComponentWriteError {
 impl Error for ComponentWriteError {}
 
 #[derive(Debug, Default)]
-struct EntityStorage {
+pub struct EntityStorage {
     component_storages: HashMap<TypeId, Box<dyn Any>>,
 }
 
