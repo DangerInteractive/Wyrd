@@ -1,16 +1,21 @@
+//! errors associated with the parking lot data structure
+
 use std::error::Error;
 use std::fmt::{Display, Formatter};
 
-#[derive(Clone, Copy, Debug)]
+/// an error representing a failure to put a value into a parking lot
+#[derive(Clone, Copy, Debug, Default)]
 pub struct PutError {
     detail: Option<&'static str>,
 }
 
 impl PutError {
+    /// create a new `PutError` without any details
     pub fn new() -> Self {
         Self { detail: None }
     }
 
+    /// create a new `PutError` with details
     pub fn new_with_detail(detail: &'static str) -> Self {
         Self {
             detail: Some(detail),
@@ -29,6 +34,7 @@ impl Display for PutError {
 
 impl Error for PutError {}
 
+/// an error representing a failure to delete a value from a parking lot
 #[derive(Clone, Copy, Debug)]
 pub struct DeleteError {
     index: usize,
@@ -36,6 +42,8 @@ pub struct DeleteError {
 }
 
 impl DeleteError {
+    /// create a new `DeleteError` given only the attempted index
+    /// (without further details)
     pub fn new(index: usize) -> Self {
         Self {
             index,
@@ -43,6 +51,7 @@ impl DeleteError {
         }
     }
 
+    /// create a new `DeleteError` given the attempted index and details
     pub fn new_with_detail(index: usize, detail: &'static str) -> Self {
         Self {
             index,

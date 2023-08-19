@@ -1,16 +1,22 @@
+//! code associated with managing and composing entities
+
 use crate::entity::EntitySlot::Empty;
 use std::error::Error;
 use std::fmt::{Display, Formatter};
 
+/// an error representing a failure to claim an entity ID
 #[derive(Default, Debug)]
 pub struct ClaimEntityIdError {
     detail: Option<&'static str>,
 }
 
 impl ClaimEntityIdError {
+    /// create a new `ClaimEntityIdError` without details
     pub fn new() -> Self {
         Default::default()
     }
+
+    /// create a new `ClaimEntityIdError` with details
     pub fn new_with_detail(detail: &'static str) -> Self {
         Self {
             detail: Some(detail),
@@ -29,6 +35,7 @@ impl Display for ClaimEntityIdError {
 
 impl Error for ClaimEntityIdError {}
 
+///
 #[derive(Default, Debug)]
 pub struct DiscardEntityIdError {
     entity_id: usize,

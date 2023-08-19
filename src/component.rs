@@ -1,11 +1,15 @@
+//! code associated with component types and component storage
+
 use std::any::{type_name, Any, TypeId};
 use std::array::from_fn;
 use std::collections::HashMap;
 use std::error::Error;
 use std::fmt::{Debug, Display, Formatter};
 
+/// a marker type representing a type that can be used as a component
 pub trait Component: Sized + Debug {}
 
+/// an error representing a failure to store or write to a component
 #[derive(Debug)]
 pub struct ComponentWriteError {
     component_type: &'static str,
@@ -14,6 +18,8 @@ pub struct ComponentWriteError {
 }
 
 impl ComponentWriteError {
+    /// create a new `ComponentWriteError` given the ID of the associated entity
+    /// (without further details)
     pub fn new<T>(entity_id: usize) -> Self {
         Self {
             component_type: type_name::<T>(),
@@ -22,6 +28,8 @@ impl ComponentWriteError {
         }
     }
 
+    /// create a new `ComponentWriteError` given the ID of the associated entity,
+    /// and details
     pub fn new_with_detail<T>(entity_id: usize, detail: &'static str) -> Self {
         Self {
             component_type: type_name::<T>(),
@@ -50,12 +58,20 @@ impl Display for ComponentWriteError {
 
 impl Error for ComponentWriteError {}
 
+/// type capable of storing a set of different components of the same type
+/// for different entities
 pub trait ComponentStorage<T: Component> {
-    fn get_component(&self, index: usize) -> Option<&'_ T>;
+    /// get a component given the index (entity ID)
+    fn get_component(&self, index: usize) -> Option<&T>;
+
+    /// store a component given the index (entity ID)
     fn set_component(&mut self, index: usize, component: T) -> Result<(), ComponentWriteError>;
+
+    /// delete a component given the index (entity ID)
     fn delete_component(&mut self, index: usize) -> Result<(), ComponentWriteError>;
 }
 
+/// an implementation of `ComponentStorage` that uses fixed-size arrays as backing memory
 #[derive(Debug)]
 pub struct ArrayComponentStorage<T: Component, const SIZE: usize> {
     components: [Option<T>; SIZE],
@@ -100,6 +116,7 @@ where
     }
 }
 
+/// an implementation of `ComponentStorage` the uses resizable vectors as backing memory
 #[derive(Debug, Default)]
 pub struct VecComponentStorage<T: Component> {
     components: Vec<Option<T>>,
@@ -109,17 +126,15 @@ impl<T> VecComponentStorage<T>
 where
     T: Component,
 {
+    /// create a new `VecComponentStorage` with a certain size reserved
+    /// in advance (it can still resize beyond this initial size)
     pub fn new_with_initial_size(initial_size: usize) -> Self {
         let mut components = vec![];
         components.reserve(initial_size);
         Self { components }
     }
-}
 
-impl<T> VecComponentStorage<T>
-where
-    T: Component,
-{
+    /// resize the backing memory, filling new cells with `None`
     fn resize(&mut self, min_size: usize) {
         let current_length = self.components.len();
         if current_length < min_size {
@@ -157,12 +172,16 @@ where
     }
 }
 
+/// a collection to store the different `ComponentStorage`s for different component types
 #[derive(Debug, Default)]
 pub struct ComponentStorageSet {
     component_storages: HashMap<TypeId, Box<dyn Any>>,
 }
 
 impl ComponentStorageSet {
+    /// store a new `ComponentStorage` for a new component type
+    /// (storing a `ComponentStorage` for a component already stored will
+    /// overwrite the previous one)
     pub fn insert_component_storage<T: 'static + Component, S: 'static + ComponentStorage<T>>(
         &mut self,
         storage: S,
@@ -182,6 +201,7 @@ impl ComponentStorageSet {
         }
     }
 
+    /// get the `ComponentStorage` for a component type (as a `ComponentStorage` trait object only)
     pub fn get_component_storage_ref<T: 'static + Component>(
         &self,
     ) -> Option<&dyn ComponentStorage<T>> {
@@ -199,6 +219,7 @@ impl ComponentStorageSet {
 //     component_to_id_map: HashMap<TypeId, (usize, usize)>,
 // }
 
+/// a fake component type for use in unit tests
 #[cfg(test)]
 #[derive(Debug, Default)]
 struct TestComponent(i32);

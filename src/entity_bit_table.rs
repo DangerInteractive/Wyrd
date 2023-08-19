@@ -1,3 +1,5 @@
+//! code for quickly looking up which entities have the required components to process a system
+
 pub trait EntityBitTable {
     fn get_entity_flags(&self, entity_id: usize) -> Option<&u64>;
     fn entity_has_component(&self, entity_id: usize, component_id: usize) -> bool {

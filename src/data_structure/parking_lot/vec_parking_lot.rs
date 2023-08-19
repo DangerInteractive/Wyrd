@@ -1,3 +1,5 @@
+//! an implementation of `ParkingLot` that uses a resizable vector as backing memory
+
 use crate::data_structure::parking_lot;
 use crate::data_structure::parking_lot::error::{DeleteError, PutError};
 use crate::data_structure::parking_lot::link::Link;
@@ -5,6 +7,7 @@ use crate::data_structure::parking_lot::space::Space;
 use crate::data_structure::parking_lot::space::Space::Full;
 use crate::data_structure::parking_lot::ParkingLot;
 
+/// an implementation of `ParkingLot` that uses a resizable vector as backing memory
 pub struct VecParkingLot<T> {
     next_empty: Link,
     vec: Vec<Space<T>>,
