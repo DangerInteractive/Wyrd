@@ -7,7 +7,9 @@ stages:
 
 build_latest:
     stage: build
+    allow_failure: false
     image: rust:latest
+    needs: []
     script:
         - rustc --version
         - cargo --version  # Print version info for debugging
@@ -15,6 +17,7 @@ build_latest:
 
 test_latest:
     stage: test
+    allow_failure: false
     image: rust:latest
     needs: ["build_latest"]
     script:
@@ -24,6 +27,7 @@ clippy:
     stage: lint
     allow_failure: true
     image: rust:latest
+    needs: []
     script:
         - rustup component add clippy
         - cargo clippy -- -D warnings
@@ -32,22 +36,26 @@ rustfmt:
     stage: lint
     allow_failure: true
     image: rust:latest
+    needs: []
     script:
         - rustup component add rustfmt
         - cargo fmt -- --check
 
 build_nightly:
     stage: build
+    allow_failure: true
     image: rustlang/rust:nightly
+    needs: []
     script:
         - rustc --version
         - cargo --version  # Print version info for debugging
         - cargo build --verbose
-    allow_failure: true
 
 test_nightly:
     stage: test
+    allow_failure: true
     image: rustlang/rust:nightly
+    needs: []
     needs: ["build_nightly"]
     script:
         - cargo test --verbose
