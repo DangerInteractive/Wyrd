@@ -1,17 +1,41 @@
 //! An Entity Component System Library
 use std::array::from_fn;
-use std::cmp::max;
-use std::fmt::Debug;
-use std::iter::repeat_with;
+use std::error::Error;
+use std::fmt::{Debug, Display, Formatter};
 
 pub trait Component: Sized + Debug {}
 
-pub enum ComponentStorageError {}
+#[derive(Debug)]
+pub struct ComponentWriteError {
+    component_type: &'static str,
+    entity_id: usize,
+}
+
+impl ComponentWriteError {
+    pub fn new<T>(entity_id: usize) -> Self {
+        Self {
+            component_type: std::any::type_name::<T>(),
+            entity_id,
+        }
+    }
+}
+
+impl Display for ComponentWriteError {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "Failed to write {} component for entity {}.",
+            self.component_type, self.entity_id
+        )
+    }
+}
+
+impl Error for ComponentWriteError {}
 
 pub trait ComponentStorage<T: Component> {
     fn get_component(&self, index: usize) -> Option<&'_ T>;
-    fn set_component(&mut self, index: usize, component: T) -> Result<(), ()>;
-    fn delete_component(&mut self, index: usize) -> Result<(), ()>;
+    fn set_component(&mut self, index: usize, component: T) -> Result<(), ComponentWriteError>;
+    fn delete_component(&mut self, index: usize) -> Result<(), ComponentWriteError>;
 }
 
 #[derive(Debug)]
@@ -30,20 +54,20 @@ where
         None
     }
 
-    fn set_component(&mut self, index: usize, component: T) -> Result<(), ()> {
+    fn set_component(&mut self, index: usize, component: T) -> Result<(), ComponentWriteError> {
         if let Some(stored) = self.components.get_mut(index) {
             *stored = Some(component);
             return Ok(());
         }
-        Err(())
+        Err(ComponentWriteError::new::<T>(index))
     }
 
-    fn delete_component(&mut self, index: usize) -> Result<(), ()> {
+    fn delete_component(&mut self, index: usize) -> Result<(), ComponentWriteError> {
         if let Some(stored) = self.components.get_mut(index) {
             *stored = None;
             return Ok(());
         }
-        Err(())
+        Err(ComponentWriteError::new::<T>(index))
     }
 }
 
@@ -78,14 +102,11 @@ impl<T> VecComponentStorage<T>
 where
     T: Component,
 {
-    fn resize(&mut self, min_size: usize) -> Result<(), ()> {
-        let additional = max(0, min_size - self.components.len());
-        if additional > 0 {
-            self.components.reserve(additional);
-            self.components
-                .extend(repeat_with(|| None).take(additional));
+    fn resize(&mut self, min_size: usize) {
+        let current_length = self.components.len();
+        if current_length < min_size {
+            self.components.resize_with(min_size, || None);
         }
-        Ok(())
     }
 }
 
@@ -100,9 +121,9 @@ where
         None
     }
 
-    fn set_component(&mut self, index: usize, component: T) -> Result<(), ()> {
+    fn set_component(&mut self, index: usize, component: T) -> Result<(), ComponentWriteError> {
         if index >= self.components.len() {
-            self.resize(index + 1)?
+            self.resize(index + 1)
         }
         if let Some(stored) = self.components.get_mut(index) {
             *stored = Some(component);
@@ -110,7 +131,7 @@ where
         Ok(())
     }
 
-    fn delete_component(&mut self, index: usize) -> Result<(), ()> {
+    fn delete_component(&mut self, index: usize) -> Result<(), ComponentWriteError> {
         if let Some(component) = self.components.get_mut(index) {
             *component = None;
         }
