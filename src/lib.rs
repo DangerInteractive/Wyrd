@@ -89,6 +89,27 @@ impl EntityStorage {
     }
 }
 
+#[cfg(test)]
+#[derive(Debug, Default)]
+struct TestComponent(i32);
+
+#[cfg(test)]
+impl Component for TestComponent {}
+
+#[test]
+fn entity_storage_can_store_and_retrieve_component_storages() {
+    let mut es: EntityStorage = Default::default();
+    let cs: VecComponentStorage<TestComponent> = Default::default();
+    assert!(
+        es.insert_component_storage(cs).is_none(),
+        "an existing component storage was returned when one shouldn't have existed yet."
+    );
+    assert!(
+        es.get_component_storage_ref::<TestComponent>().is_some(),
+        "entity storage returned None when a storage known to exist was requested."
+    );
+}
+
 pub trait ComponentStorage<T: Component> {
     fn get_component(&self, index: usize) -> Option<&'_ T>;
     fn set_component(&mut self, index: usize, component: T) -> Result<(), ComponentWriteError>;
