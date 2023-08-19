@@ -61,7 +61,7 @@ pub enum EntitySlot<T> {
 
 pub trait EntityList {
     fn claim_entity_id(&mut self) -> Result<usize, ClaimEntityIdError>;
-    fn discard_entity_id(&mut self) -> Result<(), DiscardEntityIdError>;
+    fn discard_entity_id(&mut self, entity_id: usize) -> Result<(), DiscardEntityIdError>;
 }
 
 pub struct VecEntityList<T> {
@@ -100,12 +100,22 @@ impl<T> EntityList for VecEntityList<T> {
         Ok(claimed_slot)
     }
 
-    fn discard_entity_id(&mut self) -> Result<(), DiscardEntityIdError> {
+    fn discard_entity_id(&mut self, entity_id: usize) -> Result<(), DiscardEntityIdError> {
         todo!()
     }
 }
 
-// pub struct ArrayEntityList<T, const SIZE: usize> {
-//     next_empty_slot: usize,
-//     entity_list: [EntitySlot<T>; SIZE],
-// }
+pub struct ArrayEntityList<T, const SIZE: usize> {
+    next_empty_slot: Option<usize>,
+    entity_list: [EntitySlot<T>; SIZE],
+}
+
+impl<T, const SIZE: usize> EntityList for ArrayEntityList<T, SIZE> {
+    fn claim_entity_id(&mut self) -> Result<usize, ClaimEntityIdError> {
+        todo!()
+    }
+
+    fn discard_entity_id(&mut self, entity_id: usize) -> Result<(), DiscardEntityIdError> {
+        todo!()
+    }
+}
