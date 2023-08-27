@@ -1,11 +1,11 @@
 //! an implementation of `ParkingLot` that uses a resizable vector as backing memory
 
-use crate::data_structure::parking_lot;
-use crate::data_structure::parking_lot::error::{DeleteError, PutError};
-use crate::data_structure::parking_lot::link::Link;
-use crate::data_structure::parking_lot::space::Space;
-use crate::data_structure::parking_lot::space::Space::Full;
-use crate::data_structure::parking_lot::ParkingLot;
+use crate::memory::parking_lot;
+use crate::memory::parking_lot::error::{DeleteError, PutError};
+use crate::memory::parking_lot::link::Link;
+use crate::memory::parking_lot::space::Space;
+use crate::memory::parking_lot::space::Space::Full;
+use crate::memory::parking_lot::ParkingLot;
 
 /// an implementation of `ParkingLot` that uses a resizable vector as backing memory
 pub struct VecParkingLot<T> {
@@ -58,7 +58,7 @@ impl<T> Default for VecParkingLot<T> {
 fn vec_parking_lot_can_fit_lots_of_elements() {
     let mut parking_lot: VecParkingLot<usize> = Default::default();
     for i in 0..1000000 {
-        assert!(matches!(parking_lot.put(i), Ok(_)), "failed to put a value");
+        assert!(parking_lot.put(i).is_ok(), "failed to put a value");
     }
 }
 
@@ -69,7 +69,7 @@ fn vec_parking_lot_can_delete_elements() {
     match index {
         Ok(index) => {
             assert!(
-                matches!(parking_lot.delete(index), Ok(_)),
+                parking_lot.delete(index).is_ok(),
                 "failed to delete a value"
             );
             assert!(

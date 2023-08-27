@@ -1,11 +1,11 @@
 //! an implementation of `ParkingLot` that uses a fixed-size array as backing memory
 
-use crate::data_structure::parking_lot;
-use crate::data_structure::parking_lot::error::{DeleteError, PutError};
-use crate::data_structure::parking_lot::link::Link;
-use crate::data_structure::parking_lot::space::Space;
-use crate::data_structure::parking_lot::space::Space::{Empty, Full};
-use crate::data_structure::parking_lot::ParkingLot;
+use crate::memory::parking_lot;
+use crate::memory::parking_lot::error::{DeleteError, PutError};
+use crate::memory::parking_lot::link::Link;
+use crate::memory::parking_lot::space::Space;
+use crate::memory::parking_lot::space::Space::{Empty, Full};
+use crate::memory::parking_lot::ParkingLot;
 use std::array::from_fn;
 
 /// an implementation of `ParkingLot` that uses a fixed-size array as backing memory

@@ -10,14 +10,14 @@ pub struct Link(pub Option<usize>);
 impl Link {
     /// create a new `Link` given the index of the next empty space
     #[must_use]
-    pub fn new(next: usize) -> Self {
+    pub const fn new(next: usize) -> Self {
         Self(Some(next))
     }
 
     /// create a new `Link` that ends the chain
     /// (without the index of a next empty space, it's the last one)
     #[must_use]
-    pub fn new_end() -> Self {
+    pub const fn new_end() -> Self {
         Self(None)
     }
 

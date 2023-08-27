@@ -1,7 +1,7 @@
 //! code for storing individual memory cells in a parking lot data structure
 
-use crate::data_structure::parking_lot::link::Link;
-use crate::data_structure::parking_lot::space::Space::{Empty, Full};
+use crate::memory::parking_lot::link::Link;
+use crate::memory::parking_lot::space::Space::{Empty, Full};
 use std::panic::panic_any;
 
 /// a single memory cell in a parking lot, containing either a value, or a link

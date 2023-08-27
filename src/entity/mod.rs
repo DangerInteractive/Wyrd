@@ -1,10 +1,10 @@
 //! code associated with managing and composing entities
 
-use crate::data_structure::parking_lot::array_parking_lot::ArrayParkingLot;
-use crate::data_structure::parking_lot::error::{DeleteError, PutError};
-use crate::data_structure::parking_lot::vec_parking_lot::VecParkingLot;
-use crate::data_structure::parking_lot::ParkingLot;
 use crate::entity::component_flags::{ArrayComponentFlags, ComponentFlags, VecComponentFlags};
+use crate::memory::parking_lot::array_parking_lot::ArrayParkingLot;
+use crate::memory::parking_lot::error::{DeleteError, PutError};
+use crate::memory::parking_lot::vec_parking_lot::VecParkingLot;
+use crate::memory::parking_lot::ParkingLot;
 use std::any::TypeId;
 use std::collections::HashMap;
 use std::marker::PhantomData;

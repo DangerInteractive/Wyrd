@@ -11,12 +11,12 @@ pub struct PutError {
 
 impl PutError {
     /// create a new `PutError` without any details
-    pub fn new() -> Self {
+    pub const fn new() -> Self {
         Self { detail: None }
     }
 
     /// create a new `PutError` with details
-    pub fn new_with_detail(detail: &'static str) -> Self {
+    pub const fn new_with_detail(detail: &'static str) -> Self {
         Self {
             detail: Some(detail),
         }
@@ -44,7 +44,7 @@ pub struct DeleteError {
 impl DeleteError {
     /// create a new `DeleteError` given only the attempted index
     /// (without further details)
-    pub fn new(index: usize) -> Self {
+    pub const fn new(index: usize) -> Self {
         Self {
             index,
             detail: None,
@@ -52,7 +52,7 @@ impl DeleteError {
     }
 
     /// create a new `DeleteError` given the attempted index and details
-    pub fn new_with_detail(index: usize, detail: &'static str) -> Self {
+    pub const fn new_with_detail(index: usize, detail: &'static str) -> Self {
         Self {
             index,
             detail: Some(detail),
