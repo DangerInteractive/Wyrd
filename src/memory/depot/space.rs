@@ -1,10 +1,10 @@
-//! code for storing individual memory cells in a parking lot data structure
+//! code for storing individual memory cells in a depot data structure
 
-use crate::memory::parking_lot::link::Link;
-use crate::memory::parking_lot::space::Space::{Empty, Full};
+use crate::memory::depot::link::Link;
+use crate::memory::depot::space::Space::{Empty, Full};
 use std::panic::panic_any;
 
-/// a single memory cell in a parking lot, containing either a value, or a link
+/// a single memory cell in a depot, containing either a value, or a link
 /// to another empty memory cell if it's empty (and another empty `Space`
 /// existed when it was created)
 #[derive(Clone, Copy, Debug)]

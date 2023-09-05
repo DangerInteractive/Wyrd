@@ -1,3 +1,3 @@
 //! data types used in implementing the Wyrd ECS
 
-pub mod parking_lot;
+pub mod depot;

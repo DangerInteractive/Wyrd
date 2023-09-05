@@ -1,10 +1,10 @@
 //! code associated with managing and composing entities
 
 use crate::entity::component_flags::{ArrayComponentFlags, ComponentFlags, VecComponentFlags};
-use crate::memory::parking_lot::array_parking_lot::ArrayParkingLot;
-use crate::memory::parking_lot::error::{DeleteError, PutError};
-use crate::memory::parking_lot::vec_parking_lot::VecParkingLot;
-use crate::memory::parking_lot::ParkingLot;
+use crate::memory::depot::array_depot::ArrayDepot;
+use crate::memory::depot::error::{DeleteError, PutError};
+use crate::memory::depot::vec_depot::VecDepot;
+use crate::memory::depot::Depot;
 use std::any::TypeId;
 use std::collections::HashMap;
 use std::marker::PhantomData;
@@ -62,7 +62,7 @@ pub struct EntityStorage<T, P, F>
 where
     T: Copy + BitAnd<T> + Shl<usize, Output = T> + From<u8>,
     <T as BitAnd<T>>::Output: PartialEq<T>,
-    P: ParkingLot<T>,
+    P: Depot<T>,
     F: ComponentFlags<T>,
 {
     entity_table: P,
@@ -74,7 +74,7 @@ impl<T, P, F> EntityStorage<T, P, F>
 where
     T: Copy + BitAnd<T> + Shl<usize, Output = T> + From<u8>,
     <T as BitAnd<T>>::Output: PartialEq<T>,
-    P: ParkingLot<T>,
+    P: Depot<T>,
     F: ComponentFlags<T>,
 {
     pub fn create_entity(&mut self) -> Result<usize, PutError> {
@@ -92,7 +92,7 @@ where
     }
 }
 
-pub type VecEntityStorage<T> = EntityStorage<T, VecParkingLot<T>, VecComponentFlags<T>>;
+pub type VecEntityStorage<T> = EntityStorage<T, VecDepot<T>, VecComponentFlags<T>>;
 
 pub type ArrayEntityStorage<T, const SIZE: usize> =
-    EntityStorage<T, ArrayParkingLot<T, SIZE>, ArrayComponentFlags<T, SIZE>>;
+    EntityStorage<T, ArrayDepot<T, SIZE>, ArrayComponentFlags<T, SIZE>>;

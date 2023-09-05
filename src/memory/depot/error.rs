@@ -1,9 +1,9 @@
-//! errors associated with the parking lot data structure
+//! errors associated with the depot data structure
 
 use std::error::Error;
 use std::fmt::{Display, Formatter};
 
-/// an error representing a failure to put a value into a parking lot
+/// an error representing a failure to put a value into a depot
 #[derive(Clone, Copy, Debug, Default)]
 pub struct PutError {
     detail: Option<&'static str>,
@@ -34,7 +34,7 @@ impl Display for PutError {
 
 impl Error for PutError {}
 
-/// an error representing a failure to delete a value from a parking lot
+/// an error representing a failure to delete a value from a depot
 #[derive(Clone, Copy, Debug)]
 pub struct DeleteError {
     index: usize,

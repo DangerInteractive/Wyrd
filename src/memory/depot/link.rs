@@ -1,8 +1,8 @@
-//! code for linking empty memory cells in a parking lot data structure
+//! code for linking empty memory cells in a depot data structure
 
 use std::mem::swap;
 
-/// a value that links empty spaces in a parking lot together for quick location
+/// a value that links empty spaces in a depot together for quick location
 /// of empty spaces after insertion/deletion
 #[derive(Clone, Copy, Debug)]
 pub struct Link(pub Option<usize>);
