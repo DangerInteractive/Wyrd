@@ -4,8 +4,9 @@ use error::ComponentWriteError;
 use std::fmt::Debug;
 
 pub mod array_component_storage;
-pub mod component_storage_set;
+pub mod b_tree_map_component_storage;
 pub mod error;
+pub mod hash_map_component_storage;
 pub mod vec_component_storage;
 
 /// a marker type representing a type that can be used as a component
@@ -27,7 +28,7 @@ pub trait ComponentStorage<T: Component> {
 /// a fake component type for use in unit tests
 #[cfg(test)]
 #[derive(Debug, Default)]
-struct TestComponent(i32);
+pub(crate) struct TestComponent(i32);
 
 #[cfg(test)]
 impl Component for TestComponent {}

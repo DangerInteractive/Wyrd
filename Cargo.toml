@@ -10,3 +10,4 @@ repository = "https://github.com/DangerInteractive/TimberWolf"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+armory = "0.1.0"

@@ -36,7 +36,7 @@ impl ComponentStorageSet {
         }
     }
 
-    /// get the `ComponentStorage` for a component type (as a `ComponentStorage` trait object only)
+    /// get a reference to the `ComponentStorage` for a component type (as a `ComponentStorage` trait object only)
     pub fn get_component_storage_ref<T: 'static + Component>(
         &self,
     ) -> Option<&dyn ComponentStorage<T>> {
@@ -44,6 +44,19 @@ impl ComponentStorageSet {
         if let Some(storage) = self.component_storages.get(&type_id) {
             if let Some(s) = storage.downcast_ref::<Box<dyn ComponentStorage<T>>>() {
                 return Some(s.as_ref());
+            }
+        }
+        None
+    }
+
+    /// get a mutable reference to the `ComponentStorage` for a component type (as a `ComponentStorage` trait object only)
+    pub fn get_component_storage_mut<T: 'static + Component>(
+        &mut self,
+    ) -> Option<&mut dyn ComponentStorage<T>> {
+        let type_id = TypeId::of::<T>();
+        if let Some(storage) = self.component_storages.get_mut(&type_id) {
+            if let Some(s) = storage.downcast_mut::<Box<dyn ComponentStorage<T>>>() {
+                return Some(s.as_mut());
             }
         }
         None

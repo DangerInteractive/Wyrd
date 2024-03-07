@@ -1,98 +1,75 @@
 //! code associated with managing and composing entities
-
-use crate::entity::component_flags::{ArrayComponentFlags, ComponentFlags, VecComponentFlags};
-use crate::memory::depot::array_depot::ArrayDepot;
-use crate::memory::depot::error::{DeleteError, PutError};
-use crate::memory::depot::vec_depot::VecDepot;
-use crate::memory::depot::Depot;
-use std::any::TypeId;
+use crate::component::error::ComponentWriteError;
+use crate::component::{Component, ComponentStorage};
+use crate::entity::component_storage_set::ComponentStorageSet;
+use armory::Depot;
 use std::collections::HashMap;
-use std::marker::PhantomData;
-use std::mem::size_of;
-use std::ops::{BitAnd, Shl};
+use std::hash::Hash;
 
-pub mod component_flags;
+pub mod component_storage_set;
 
-#[derive(Clone, Copy, Debug)]
-pub struct ComponentFlagId {
-    pub set_index: usize,
-    pub flag_index: usize,
+pub trait EntityIdGenerator<T: Clone + Eq + Hash> {
+    fn generate_entity_id(&self) -> T;
 }
 
-pub struct ComponentRegistry<T>
+pub struct EntityProvision<T: Clone + Eq + Hash> {
+    pub index: usize,
+    pub id: T,
+}
+
+pub struct World<I, D, G>
 where
-    T: 'static,
+    I: Clone + Eq + Hash,
+    D: Depot<I>,
+    G: EntityIdGenerator<I>,
 {
-    component_to_id_map: HashMap<TypeId, ComponentFlagId>,
-    next_registration: ComponentFlagId,
-    _phantom: PhantomData<T>,
+    ids: D,
+    id_to_index: HashMap<I, usize>,
+    component_storage_set: ComponentStorageSet,
+    entity_id_generator: G,
 }
 
-impl<T> ComponentRegistry<T> {
-    pub fn get_component_flag_id(&self) -> Option<ComponentFlagId> {
-        let type_id = TypeId::of::<T>();
-        self.component_to_id_map.get(&type_id).copied()
+impl<I, D, G> World<I, D, G>
+where
+    I: Clone + Eq + Hash,
+    D: Depot<I>,
+    G: EntityIdGenerator<I>,
+{
+    pub fn register_component<T: 'static + Component, S: 'static + ComponentStorage<T>>(
+        &mut self,
+        component_storage: S,
+    ) {
+        self.component_storage_set
+            .insert_component_storage(component_storage);
     }
 
-    pub fn register_component<C>(&mut self) -> Option<ComponentFlagId> {
-        let type_id = TypeId::of::<T>();
-        let next_reg = self.get_next_registration();
-        self.component_to_id_map.insert(type_id, next_reg)
+    pub fn insert_component<T: 'static + Component>(
+        &mut self,
+        index: usize,
+        component: T,
+    ) -> Result<(), ComponentWriteError> {
+        if let Some(storage) = self.component_storage_set.get_component_storage_mut::<T>() {
+            return storage.set_component(index, component);
+        }
+
+        Err(ComponentWriteError::new_with_detail::<T>(
+            index,
+            "component storage not found",
+        ))
     }
 
-    pub fn get_next_registration(&mut self) -> ComponentFlagId {
-        let reg = self.next_registration;
-        match self.next_registration.flag_index {
-            index if index < size_of::<T>() * 8 => {
-                self.next_registration.flag_index += 1;
-            }
-            _ => {
-                self.next_registration = ComponentFlagId {
-                    set_index: self.next_registration.set_index + 1,
-                    flag_index: 0,
+    pub fn provision_entity(&mut self) -> Result<EntityProvision<I>, String> {
+        let id = self.entity_id_generator.generate_entity_id();
+        match self.ids.put(id.clone()) {
+            Ok(index) => {
+                if self.id_to_index.insert(id.clone(), index).is_none() {
+                    return Err(String::from(
+                        "failed to insert entry to map entity ID to entity index",
+                    ));
                 }
+                Ok(EntityProvision { index, id })
             }
-        }
-        reg
-    }
-}
-
-#[derive(Clone, Debug)]
-pub struct EntityStorage<T, P, F>
-where
-    T: Copy + BitAnd<T> + Shl<usize, Output = T> + From<u8>,
-    <T as BitAnd<T>>::Output: PartialEq<T>,
-    P: Depot<T>,
-    F: ComponentFlags<T>,
-{
-    entity_table: P,
-    entity_table_extensions: Vec<F>,
-    _phantom: PhantomData<T>,
-}
-
-impl<T, P, F> EntityStorage<T, P, F>
-where
-    T: Copy + BitAnd<T> + Shl<usize, Output = T> + From<u8>,
-    <T as BitAnd<T>>::Output: PartialEq<T>,
-    P: Depot<T>,
-    F: ComponentFlags<T>,
-{
-    pub fn create_entity(&mut self) -> Result<usize, PutError> {
-        match self.entity_table.put(T::from(0)) {
-            Ok(entity_id) => Ok(entity_id),
-            Err(err) => Err(err),
-        }
-    }
-
-    pub fn delete_entity(&mut self, entity_id: usize) -> Result<(), DeleteError> {
-        match self.entity_table.delete(entity_id) {
-            Ok(_) => Ok(()),
-            Err(err) => Err(err),
+            Err(e) => Err(e.to_string()),
         }
     }
 }
-
-pub type VecEntityStorage<T> = EntityStorage<T, VecDepot<T>, VecComponentFlags<T>>;
-
-pub type ArrayEntityStorage<T, const SIZE: usize> =
-    EntityStorage<T, ArrayDepot<T, SIZE>, ArrayComponentFlags<T, SIZE>>;
