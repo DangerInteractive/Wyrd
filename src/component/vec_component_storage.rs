@@ -1,3 +1,4 @@
+use std::mem;
 use crate::component::error::ComponentWriteError;
 use crate::component::{Component, ComponentStorage};
 
@@ -32,27 +33,31 @@ impl<T> ComponentStorage<T> for VecComponentStorage<T>
 where
     T: Component,
 {
-    fn get_component(&self, index: usize) -> Option<&'_ T> {
+    fn get(&self, index: usize) -> Option<&'_ T> {
         if let Some(Some(component)) = self.components.get(index) {
             return Some(component);
         }
         None
     }
 
-    fn set_component(&mut self, index: usize, component: T) -> Result<(), ComponentWriteError> {
+    fn insert(&mut self, index: usize, component: T) -> Result<Option<T>, ComponentWriteError> {
         if index >= self.components.len() {
             self.resize(index + 1)
         }
         if let Some(stored) = self.components.get_mut(index) {
-            *stored = Some(component);
+            let mut tmp = Some(component);
+            mem::swap(stored, &mut tmp);
+            return Ok(tmp);
         }
-        Ok(())
+        Err(ComponentWriteError::new_with_detail::<T>(index, "index out of bounds"))
     }
 
-    fn delete_component(&mut self, index: usize) -> Result<(), ComponentWriteError> {
+    fn delete(&mut self, index: usize) -> Result<Option<T>, ComponentWriteError> {
         if let Some(component) = self.components.get_mut(index) {
-            *component = None;
+            let mut tmp = None;
+            mem::swap(component, &mut tmp);
+            return Ok(tmp);
         }
-        Ok(())
+        Ok(None) // index out of bounds, but that's okay because we're "deleting" it
     }
 }

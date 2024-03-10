@@ -16,13 +16,13 @@ pub trait Component: Sized + Debug {}
 /// for different entities
 pub trait ComponentStorage<T: Component> {
     /// get a component given the index (entity ID)
-    fn get_component(&self, index: usize) -> Option<&T>;
+    fn get(&self, index: usize) -> Option<&T>;
 
     /// store a component given the index (entity ID)
-    fn set_component(&mut self, index: usize, component: T) -> Result<(), ComponentWriteError>;
+    fn insert(&mut self, index: usize, component: T) -> Result<Option<T>, ComponentWriteError>;
 
     /// delete a component given the index (entity ID)
-    fn delete_component(&mut self, index: usize) -> Result<(), ComponentWriteError>;
+    fn delete(&mut self, index: usize) -> Result<Option<T>, ComponentWriteError>;
 }
 
 /// a fake component type for use in unit tests

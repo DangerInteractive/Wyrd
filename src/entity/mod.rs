@@ -8,36 +8,36 @@ use std::hash::Hash;
 
 pub mod component_storage_set;
 
-pub trait EntityIdGenerator<T: Clone + Eq + Hash> {
-    fn generate_entity_id(&self) -> T;
+pub trait IDGenerator<ID: Clone + Eq + Hash> {
+    fn new_id(&self) -> ID;
 }
 
-pub struct EntityProvision<T: Clone + Eq + Hash> {
+pub struct EntityProvision<ID: Clone + Eq + Hash> {
     pub index: usize,
-    pub id: T,
+    pub id: ID,
 }
 
-pub struct World<I, D, G>
+pub struct World<ID, EntDepot, IDGen>
 where
-    I: Clone + Eq + Hash,
-    D: Depot<I>,
-    G: EntityIdGenerator<I>,
+    ID: Clone + Eq + Hash,
+    EntDepot: Depot<ID>,
+    IDGen: IDGenerator<ID>,
 {
-    ids: D,
-    id_to_index: HashMap<I, usize>,
+    ids: EntDepot,
+    id_to_index: HashMap<ID, usize>,
     component_storage_set: ComponentStorageSet,
-    entity_id_generator: G,
+    entity_id_generator: IDGen,
 }
 
-impl<I, D, G> World<I, D, G>
+impl<ID, EntDepot, IDGen> World<ID, EntDepot, IDGen>
 where
-    I: Clone + Eq + Hash,
-    D: Depot<I>,
-    G: EntityIdGenerator<I>,
+    ID: Clone + Eq + Hash,
+    EntDepot: Depot<ID>,
+    IDGen: IDGenerator<ID>,
 {
-    pub fn register_component<T: 'static + Component, S: 'static + ComponentStorage<T>>(
+    pub fn register_component<T: 'static + Component, Storage: 'static + ComponentStorage<T>>(
         &mut self,
-        component_storage: S,
+        component_storage: Storage,
     ) {
         self.component_storage_set
             .insert_component_storage(component_storage);
@@ -47,9 +47,9 @@ where
         &mut self,
         index: usize,
         component: T,
-    ) -> Result<(), ComponentWriteError> {
+    ) -> Result<Option<T>, ComponentWriteError> {
         if let Some(storage) = self.component_storage_set.get_component_storage_mut::<T>() {
-            return storage.set_component(index, component);
+            return storage.insert(index, component);
         }
 
         Err(ComponentWriteError::new_with_detail::<T>(
@@ -58,8 +58,8 @@ where
         ))
     }
 
-    pub fn provision_entity(&mut self) -> Result<EntityProvision<I>, String> {
-        let id = self.entity_id_generator.generate_entity_id();
+    pub fn provision_entity(&mut self) -> Result<EntityProvision<ID>, String> {
+        let id = self.entity_id_generator.new_id();
         match self.ids.put(id.clone()) {
             Ok(index) => {
                 if self.id_to_index.insert(id.clone(), index).is_none() {
