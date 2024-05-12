@@ -36,7 +36,10 @@ pub mod test {
     impl Component for TestComponent {}
 
     /// test that a `ComponentStorage` satisfies the expected core initialization behavior
-    pub fn test_init_behavior<S: ComponentStorage<TestComponent>, I: Iterator<Item=usize>>(storage: &S, index_iterator: I) {
+    pub fn test_init_behavior<S: ComponentStorage<TestComponent>, I: Iterator<Item = usize>>(
+        storage: &S,
+        index_iterator: I,
+    ) {
         for i in index_iterator {
             assert!(
                 storage.get(i).is_none(),
@@ -45,7 +48,7 @@ pub mod test {
             )
         }
     }
-    
+
     /// test that a `ComponentStorage` satisfies the expected core insertion and updating behavior
     pub fn test_insert_and_update_behavior<
         S: ComponentStorage<TestComponent>,
