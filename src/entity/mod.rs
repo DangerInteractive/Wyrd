@@ -8,20 +8,40 @@ use std::hash::Hash;
 
 pub mod component_storage_set;
 
-pub trait IDGenerator<ID: Clone + Eq + Hash> {
-    fn new_id(&self) -> ID;
-}
-
 pub struct EntityProvision<ID: Clone + Eq + Hash> {
     pub index: usize,
     pub id: ID,
+}
+
+pub struct Entity<'a, ID: Clone + Eq + Hash, EntDepot: Depot<ID>, IDGen: Fn() -> ID> {
+    pub index: usize,
+    world: &'a World<ID, EntDepot, IDGen>,
+}
+
+impl<'a, ID, EntDepot, IDGen> Entity<'a, ID, EntDepot, IDGen>
+where
+    ID: Clone + Eq + Hash,
+    EntDepot: Depot<ID>,
+    IDGen: Fn() -> ID,
+{
+    pub fn get_component<T: 'static + Component>(&self) -> Option<&T> {
+        if let Some(storage) = self
+            .world
+            .component_storage_set
+            .get_component_storage_ref::<T>()
+        {
+            return storage.get(self.index);
+        }
+
+        None
+    }
 }
 
 pub struct World<ID, EntDepot, IDGen>
 where
     ID: Clone + Eq + Hash,
     EntDepot: Depot<ID>,
-    IDGen: IDGenerator<ID>,
+    IDGen: Fn() -> ID,
 {
     ids: EntDepot,
     id_to_index: HashMap<ID, usize>,
@@ -33,7 +53,7 @@ impl<ID, EntDepot, IDGen> World<ID, EntDepot, IDGen>
 where
     ID: Clone + Eq + Hash,
     EntDepot: Depot<ID>,
-    IDGen: IDGenerator<ID>,
+    IDGen: Fn() -> ID,
 {
     pub fn register_component<T: 'static + Component, Storage: 'static + ComponentStorage<T>>(
         &mut self,
@@ -59,7 +79,7 @@ where
     }
 
     pub fn provision_entity(&mut self) -> Result<EntityProvision<ID>, String> {
-        let id = self.entity_id_generator.new_id();
+        let id = (self.entity_id_generator)();
         match self.ids.put(id.clone()) {
             Ok(index) => {
                 if self.id_to_index.insert(id.clone(), index).is_none() {
