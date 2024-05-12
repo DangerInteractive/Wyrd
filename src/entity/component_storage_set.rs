@@ -3,9 +3,9 @@ use std::any::{Any, TypeId};
 use std::collections::HashMap;
 
 #[cfg(test)]
-use crate::component::vec_component_storage::VecComponentStorage;
+use crate::component::test::TestComponent;
 #[cfg(test)]
-use crate::component::TestComponent;
+use crate::component::vec_component_storage::VecComponentStorage;
 
 /// a collection to store the different `ComponentStorage`s for different component types
 #[derive(Debug, Default)]

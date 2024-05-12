@@ -42,3 +42,25 @@ where
         }
     }
 }
+
+#[cfg(test)]
+mod test {
+    use crate::component::hash_map_component_storage::HashMapComponentStorage;
+    use crate::component::test::{
+        test_init_behavior, test_insert_and_update_behavior, TestComponent,
+    };
+
+    #[test]
+    fn test_init() {
+        let storage: HashMapComponentStorage<TestComponent> =
+            HashMapComponentStorage::default();
+        test_init_behavior(&storage, 0..64);
+    }
+
+    #[test]
+    fn test_insert_update() {
+        let mut storage: HashMapComponentStorage<TestComponent> =
+            HashMapComponentStorage::default();
+        test_insert_and_update_behavior(&mut storage, 0..64);
+    }
+}

@@ -61,3 +61,24 @@ where
         Ok(None) // index out of bounds, but that's okay because we're "deleting" it
     }
 }
+
+#[cfg(test)]
+mod test {
+    use crate::component::test::{
+        test_init_behavior, test_insert_and_update_behavior, TestComponent,
+    };
+    use crate::component::vec_component_storage::VecComponentStorage;
+
+    #[test]
+    fn test_init() {
+        let storage: VecComponentStorage<TestComponent> = VecComponentStorage::default();
+        test_init_behavior(&storage, 0..64);
+    }
+
+    #[test]
+    fn test_insert_update() {
+        let mut storage: VecComponentStorage<TestComponent> =
+            VecComponentStorage::default();
+        test_insert_and_update_behavior(&mut storage, 0..64);
+    }
+}

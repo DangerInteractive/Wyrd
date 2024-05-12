@@ -49,3 +49,38 @@ where
         }
     }
 }
+
+#[cfg(test)]
+mod test {
+    use crate::component::array_component_storage::ArrayComponentStorage;
+    use crate::component::test::{
+        test_init_behavior, test_insert_and_update_behavior, TestComponent,
+    };
+    use crate::component::ComponentStorage;
+
+    #[test]
+    fn test_init() {
+        let storage: ArrayComponentStorage<TestComponent, 64> = ArrayComponentStorage::default();
+        test_init_behavior(&storage, 0..64);
+    }
+
+    #[test]
+    fn test_insert_update() {
+        let mut storage: ArrayComponentStorage<TestComponent, 64> =
+            ArrayComponentStorage::default();
+        test_insert_and_update_behavior(&mut storage, 0..64);
+    }
+
+    #[test]
+    fn test_none_on_get_out_of_bounds() {
+        let storage: ArrayComponentStorage<TestComponent, 64> = ArrayComponentStorage::default();
+        assert!(storage.get(64).is_none())
+    }
+
+    #[test]
+    fn test_err_on_insert_out_of_bounds() {
+        let mut storage: ArrayComponentStorage<TestComponent, 64> =
+            ArrayComponentStorage::default();
+        assert!(storage.insert(64, TestComponent(0)).is_err())
+    }
+}
