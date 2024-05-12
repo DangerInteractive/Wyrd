@@ -15,9 +15,9 @@ where
     /// create a new `VecComponentStorage` with a certain size reserved
     /// in advance (it can still resize beyond this initial size)
     pub fn new_with_initial_size(initial_size: usize) -> Self {
-        let mut components = vec![];
-        components.reserve(initial_size);
-        Self { components }
+        Self {
+            components: Vec::with_capacity(initial_size),
+        }
     }
 
     /// resize the backing memory, filling new cells with `None`
