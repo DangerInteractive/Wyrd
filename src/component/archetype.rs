@@ -25,14 +25,3 @@ pub struct Archetype {
     archetype_type: ArchetypeType,
     component_storages: HashMap<TypeId, *mut u8>,
 }
-
-#[derive(Default)]
-pub struct ArchetypeStorage {
-    archetypes: HashMap<ArchetypeType, Archetype>,
-}
-
-impl ArchetypeStorage {
-    pub fn new() -> Self {
-        Default::default()
-    }
-}
